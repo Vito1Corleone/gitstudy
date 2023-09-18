@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+  <data>
+    <record id="estate_property_tree_view" model="ir.ui.view">
+      <field name="name">房地产广告</field>
+      <field name="model">estate.property</field>
+      <field name="arch" type="xml">
+          <tree>
+              <field name="name" string="名称"/>
+              <field name="postcode" string="邮编"/>
+              <field name="bedrooms" string="房间数量"/>
+              <field name="living_area" string="居住面积"/>
+              <field name="expected_price" string="期望价格"/>
+              <field name="selling_price" string="销售价格"/>
+              <field name="date_availability" string="到期时间"/>
+          </tree>
+      </field>
+    </record>
+
+    <record id="estate_property_form_view" model="ir.ui.view">
+        <field name="name">房地产广告</field>
+        <field name="model">estate.property</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <h1>
+                        <field name="name"/>
+                    </h1>
+                    <field name="tag_ids" widget="many2many_tags"/> # 让标签看起来更加美观
+                    <group>
+                        <group>
+                            <field name="postcode" string="邮编"/>
+                            <field name="date_availability" string="到期时间" required="True"/>  # required为false，当为true时，默认为必填
+                            <field name="property_type_id"/>
+                        </group>
+                        <group>
+                            <field name="expected_price" string="期望价格"/>
+                            <field name="best_price" string="Best Price"/>
+                            <field name="selling_price" string="销售价格" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">     # 描述信息的字段
+                            <group>
+                                <field name="description"/>
+                                <field name="bedrooms"/>
+                                <field name="living_area"/>  # readonly="1"是只读的，默认为0是可编辑的
+                                <field name="facades"/>
+                                <field name="garage"/>
+                                <field name="garden"/>
+                                <field name="garage_area" attrs="{'invisible': [('garage', '=', False)]}"/>  # invisible=0,默认为0，显示该字段
+                                <field name="garage_orientation" attrs="{'invisible': [('garage', '=', False)]}"/>  # 'required': [('garage', '=', True)]garage为真，该字段为必填
+                                <field name="garden_area" attrs="{'invisible': [('garden', '=', False)]}"/>  # invisible=1，该字段就会隐藏起来
+                                <field name="garden_orientation" attrs="{'invisible': [('garden', '=', False)]}"/>  # 当garden字段为False时，invisible就为1
+                                <field name="total_area"/>
+                                <field name="test_float"/>
+                                <field name="test_int"/>
+                            </group>
+                        </page>
+                        <page string="Offers">  # 报价
+                            <field name="offer_ids">
+                                <tree>
+                                    <field name="price"/>
+                                    <field name="status"/>
+                                    <field name="validity"/>
+                                    <field name="date_deadline"/>
+                                    <field name="partner_id"/>
+                                </tree>
+                                <form>
+                                    <sheet>
+                                        <group>
+                                             <field name="price"/>
+                                             <field name="status"/>
+                                             <field name="validity"/>
+                                             <field name="date_deadline"/>
+                                             <field name="partner_id"/>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Other Info">      # 其他信息，买家，卖家
+                            <group>
+                                <field name="saleman_id"/>
+                                <field name="buyer_id"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="estate_property_search_view" model="ir.ui.view">
+        <field name="name">房地产广告</field>
+        <field name="model">estate.property</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="名称"/>
+                <field name="postcode" string="邮编"/>
+                <field name="living_area" string="居住面积"/>
+                <filter name="多房间" domain="[('bedrooms', '>', 3)]"/>
+                <filter name="物超所值" domain="[('bedrooms', '>', 3), ('selling_price', '>', 4000)]"/>
+<!--                domain里面的是这个分支的判断条件，可以有多个判断条件-->
+                <group string="group by">
+                    <filter name="garden_orientation" string="花园朝向" context="{'group_by': 'garden_orientation'}"/>
+                    <filter name="garage_orientation" string="车库朝向" context="{'group_by': 'garage_orientation'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="estate_property_pivot_view" model="ir.ui.view">
+        <field name="name">房地产广告透视表</field>
+        <field name="model">estate.property</field>
+        <field name="arch" type="xml">
+            <pivot disable_linking="True" display_quantity="True">
+                <field name="garden" type="row"/>
+                <field name="test_float" type="measure"/>
+                <field name="test_int" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="estate_record_graph_view" model="ir.ui.view">
+        <field name="name">房地产广告图表</field>
+        <field name="model">estate.property</field>
+        <field name="arch" type="xml">
+            <graph>
+                <field name="property_type_id" type="row"/>
+                <field name="test_int" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="estate_property_act_window" model="ir.actions.act_window">
+      <field name="name">房屋交易</field>
+      <field name="res_model">estate.property</field>
+      <field name="view_mode">tree,form,pivot,graph</field>
+    </record>
+
+    <menuitem id="estate_property_menu_action" sequence="20" name="房地产广告"/>
+    <menuitem id="estate_property_sec_menu_action"
+              sequence="20"
+              name="房屋交易"
+              parent="estate.estate_property_menu_action"
+              action="estate_property_act_window"/>
+
+  </data>
+</odoo>
